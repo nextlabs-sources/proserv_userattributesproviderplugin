@@ -1,0 +1,23 @@
+<project name="obfuscate_build" xmlns:ivy="antlib:org.apache.ivy.ant">
+
+   <import file="${common.build.script.dir}/java_build.xml" />
+
+   <target name="init" depends="java_build.init" description="Initialize build">
+        <ivy:cachepath pathid="obfuscate.classpath" file="${common.build.script.dir}/obfuscate_build_ivy.xml" conf="obfuscate" resolveId="obfuscate_resolve_id"/>
+        <taskdef name="allatori" classname="com.allatori.ant.ObfuscatorTask">
+                <classpath refid="obfuscate.classpath"/> 
+        </taskdef>
+   </target>
+
+   <target name="package" depends="compile">
+        <if>
+          <equals arg1="${build.without.obfuscation}" arg2="yes"/>
+          <then>
+            <copy file="${initial.jar.name}" tofile="${final.jar.name}" overwrite="true"/>
+          </then>
+          <else>
+            <allatori config="${obfuscation.config.file}" />
+          </else>
+        </if>
+   </target>
+</project>

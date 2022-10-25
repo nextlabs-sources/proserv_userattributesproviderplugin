@@ -1,0 +1,15 @@
+########################################################################
+#
+# Build target version information.
+#
+# These define the defaults for build version information.  They may be
+# override by the Makefile.inc of any module.
+#
+########################################################################
+
+VERSION_MAJOR = 4
+VERSION_MINOR = 5
+VERSION_SUBMINOR = 0
+VERSION_SUBSUBMINOR = 0
+VERSION_BUILD = -1
+VERSION_PRODUCT  = NextLabs, Inc.

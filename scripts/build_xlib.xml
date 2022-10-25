@@ -1,0 +1,315 @@
+<!-- build_xlib.xml
+
+Description:
+	This ANT script constructs <project root>/xlib.
+
+	To use this script, you must update properties is <project root>/scripts/build.properties or overide 
+	them from commandline (using -D option). For example:
+		
+		set PATH=C:\depot\external\apache-ant\apache-ant-1.8.4\bin;%PATH%
+		ant -XX:MaxPermSize=512m -Dnlbuildroot=C:/depot/PolicyStudio/dev/BuildScript_1205 -Dexternal.dir=c:/depot/external -Dexternal.dir=c:/depot/external -f scripts/build_xlib.xml
+		
+	or
+		
+		set PATH=C:\depot\external\apache-ant\apache-ant-1.8.4\bin;%PATH%
+		set ANT_OPTS=-XX:MaxPermSize=512m -Dnlbuildroot=%NLBUILDROOT% -Dexternal.dir=%NLEXTERNALDIR% -Dexternal.dir=%NLEXTERNALDIR% 
+		ant -f scripts/build_xlib.xml -v	
+-->
+
+<project name="build_xlib" default="all" basedir="..">
+
+	<!-- Debug 
+	<echoproperties />
+	<fail message="INFO: Debug" />
+	-->
+
+	<!-- Properties -->
+	<property name="nlbuildroot" location="${basedir}" />
+	<property name="temp_dir" value="${nlbuildroot}/temp" />
+	<property file="${nlbuildroot}/scripts/build.properties" />
+	<property file="${nlbuildroot}/scripts/build_common.properties" />
+	
+	<!-- Dump properties -->
+	<echoproperties />
+
+	<echo message="INFO: Dump properties completed" />
+
+	<!-- Sanity checks -->
+	<fail message="external.dir is not set" unless="external.dir" />
+	<fail message="external.dir is empty">
+		<condition>
+			<equals arg1="${external.dir}" arg2="" trim="true" />
+		</condition>
+	</fail>
+	<available file="${external.dir}" type="dir" property="local.external.dir_exists" />
+	<fail message="external.dir directory does not exist - ${external.dir}" unless="local.external.dir_exists" />
+
+	<fail message="external.dir2 is not set" unless="external.dir2" />
+	<fail message="external.dir2 is empty">
+		<condition>
+			<equals arg1="${external.dir2}" arg2="" trim="true" />
+		</condition>
+	</fail>
+	<available file="${external.dir2}" type="dir" property="local.external.dir2_exists" />
+	<fail message="external.dir2 directory does not exist - ${external.dir2}" unless="local.external.dir_exists" />
+
+	<echo message="INFO: Sanity check completed (no error)" />
+
+	<!-- Targets-->
+	<target name="all" depends="clean, prepare_destiny_jar, prepare_installer_x86, prepare_installer_x64, prepare_external_java" />
+
+	<target name="prepare_destiny_jar">
+		<mkdir dir="${xlib_jar_dir}" />
+		<mkdir dir="${temp_dir}" />
+		<unzip src="${RMS_SDK_PACKAGE_ZIP}" dest="${temp_dir}" overwrite="yes">
+					<patternset>
+						<include name="rms.war"/>
+					</patternset>
+					<mapper type="flatten" />
+		</unzip>
+		<unzip src="${temp_dir}/rms.war" dest="${xlib_jar_dir}" overwrite="yes">
+						<patternset>
+							<include name="WEB-INF/lib/commons-cli-1.2.jar"/>
+							<include name="WEB-INF/lib/commons-codec-1.15.jar"/>
+							<include name="WEB-INF/lib/commons-lang3-3.12.0.jar"/>
+							<include name="WEB-INF/lib/gson-2.8.2.jar"/>
+							<include name="WEB-INF/lib/guava-31.0.1-jre.jar"/>
+							<include name="WEB-INF/lib/infinispan-client-hotrod-13.0.2.Final.jar"/>
+							<include name="WEB-INF/lib/infinispan-commons-13.0.2.Final.jar"/>
+							<include name="WEB-INF/lib/infinispan-core-13.0.2.Final.jar"/>
+							<include name="WEB-INF/lib/infinispan-jboss-marshalling-13.0.2.Final.jar"/>
+							<include name="WEB-INF/lib/log4j-api-2.17.1.jar"/>
+							<include name="WEB-INF/lib/log4j-core-2.17.1.jar"/>
+							<include name="WEB-INF/lib/shared.jar"/>
+							<include name="WEB-INF/lib/rms_shared.jar"/>
+							
+							<include name="WEB-INF/lib/caffeine-2.8.4.jar"/>
+							<include name="WEB-INF/lib/infinispan-jboss-marshalling-13.0.2.Final.jar"/>
+							<include name="WEB-INF/lib/jboss-logging-3.4.3.Final.jar"/>
+							<include name="WEB-INF/lib/jboss-marshalling-osgi-2.0.12.Final.jar"/>
+							<include name="WEB-INF/lib/jboss-transaction-api_1.2_spec-1.1.1.Final.jar"/>
+							<include name="WEB-INF/lib/netty-buffer-4.1.63.Final.jar"/>
+							<include name="WEB-INF/lib/netty-codec-4.1.63.Final.jar"/>
+							<include name="WEB-INF/lib/netty-common-4.1.63.Final.jar"/>
+							<include name="WEB-INF/lib/netty-handler-4.1.63.Final.jar"/>
+							<include name="WEB-INF/lib/netty-resolver-4.1.63.Final.jar"/>
+							<include name="WEB-INF/lib/netty-transport-4.1.63.Final.jar"/>
+							<include name="WEB-INF/lib/netty-transport-native-epoll-4.1.63.Final-linux-x86_64.jar"/>
+							<include name="WEB-INF/lib/netty-transport-native-unix-common-4.1.63.Final.jar"/>
+							<include name="WEB-INF/lib/protostream-4.4.1.Final.jar"/>
+							<include name="WEB-INF/lib/reactive-streams-1.0.3.jar"/>
+							<include name="WEB-INF/lib/rxjava-3.0.4.jar"/>
+							<include name="WEB-INF/lib/wildfly-common-1.5.4.Final.jar"/>
+							<include name="WEB-INF/lib/wildfly-elytron-asn1-1.17.2.Final.jar"/>
+							<include name="WEB-INF/lib/wildfly-elytron-auth-1.17.2.Final.jar"/>
+							<include name="WEB-INF/lib/wildfly-elytron-auth-server-1.17.2.Final.jar"/>
+							<include name="WEB-INF/lib/wildfly-elytron-base-1.17.2.Final.jar"/>
+							<include name="WEB-INF/lib/wildfly-elytron-credential-1.17.2.Final.jar"/>
+							<include name="WEB-INF/lib/wildfly-elytron-http-1.17.2.Final.jar"/>
+							<include name="WEB-INF/lib/wildfly-elytron-keystore-1.17.2.Final.jar"/>
+							<include name="WEB-INF/lib/wildfly-elytron-mechanism-1.17.2.Final.jar"/>
+							<include name="WEB-INF/lib/wildfly-elytron-mechanism-digest-1.17.2.Final.jar"/>
+							<include name="WEB-INF/lib/wildfly-elytron-mechanism-gssapi-1.17.2.Final.jar"/>
+							<include name="WEB-INF/lib/wildfly-elytron-mechanism-oauth2-1.17.2.Final.jar"/>
+							<include name="WEB-INF/lib/wildfly-elytron-mechanism-scram-1.17.2.Final.jar"/>
+							<include name="WEB-INF/lib/wildfly-elytron-password-impl-1.17.2.Final.jar"/>
+							<include name="WEB-INF/lib/wildfly-elytron-permission-1.17.2.Final.jar"/>
+							<include name="WEB-INF/lib/wildfly-elytron-provider-util-1.17.2.Final.jar"/>
+							<include name="WEB-INF/lib/wildfly-elytron-sasl-1.17.2.Final.jar"/>
+							<include name="WEB-INF/lib/wildfly-elytron-sasl-digest-1.17.2.Final.jar"/>
+							<include name="WEB-INF/lib/wildfly-elytron-sasl-external-1.17.2.Final.jar"/>
+							<include name="WEB-INF/lib/wildfly-elytron-sasl-gs2-1.17.2.Final.jar"/>
+							<include name="WEB-INF/lib/wildfly-elytron-sasl-gssapi-1.17.2.Final.jar"/>
+							<include name="WEB-INF/lib/wildfly-elytron-sasl-oauth2-1.17.2.Final.jar"/>
+							<include name="WEB-INF/lib/wildfly-elytron-sasl-plain-1.17.2.Final.jar"/>
+							<include name="WEB-INF/lib/wildfly-elytron-sasl-scram-1.17.2.Final.jar"/>
+							<include name="WEB-INF/lib/wildfly-elytron-security-manager-action-1.17.2.Final.jar"/>
+							<include name="WEB-INF/lib/wildfly-elytron-ssl-1.17.2.Final.jar"/>
+							<include name="WEB-INF/lib/wildfly-elytron-util-1.17.2.Final.jar"/>
+						</patternset>
+						<mapper type="flatten" />
+			</unzip>
+		<!-- Extract files -->
+		<unzip src="${xlib_destiny_build_artifacts_zip_file}" dest="${xlib_jar_dir}" overwrite="yes">
+			<patternset>
+				<include name="agent/lib/agent-common.jar"/>
+				<include name="agent/lib/agent-controlmanager.jar"/>
+				<include name="agent/lib/agent-ipc.jar"/>
+				<include name="agent/lib/client-pf.jar"/>
+				<include name="agent/lib/common-domain-types.jar"/>
+				<include name="agent/lib/common-domain.jar"/>
+				<include name="agent/lib/common-framework-types.jar"/>
+				<include name="agent/lib/common-framework.jar"/>
+				<include name="agent/lib/common-pf.jar"/>
+				<include name="agent/lib/common-version-impl.jar"/>
+				<include name="agent/lib/common-version.jar"/>
+				<include name="agent/lib/crypt.jar"/>
+				<include name="agent/lib/server-shared-types.jar"/>
+				<include name="agent/lib/version-types.jar"/>
+				<include name="agent/lib/version.jar"/>
+				<include name="app-framework.jar"/>
+				<include name="batchdeployer.jar"/>
+				<include name="client-security-config.jar"/>
+				<include name="common-res.jar"/>
+				<include name="logremover.jar"/>
+				<include name="policy-services.jar"/>
+				<include name="policy-types.jar"/>
+				<include name="server-framework.jar"/>
+				<include name="server-shared-services.jar"/>
+			</patternset>
+			<mapper type="flatten" />
+		</unzip>
+
+		<!-- Check if file exists 
+		Notes: Currently, Unzip task or ZipFileSet does not have a way to report error if a file
+		cannot be found in a zip file. In addition, there is no simple way to check if a file 
+		exists in Ant. We can call out to Bash to check if a file exists, but that creates an
+		unnecessary dependency on Bash. In the following, we try to check if a file exist using
+		a fake move. Doing this, an error will be generated if a file does not exist.
+		-->
+		<move file="${xlib_jar_dir}/agent-ipc.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/agent-controlmanager.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/agent-common.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/app-framework.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/client-pf.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/client-security-config.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/common-domain-types.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/common-domain.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/common-framework-types.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/common-framework.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/common-pf.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/common-res.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/common-version-impl.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/common-version.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/crypt.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/policy-services.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/policy-types.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/server-framework.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/server-shared-services.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/server-shared-types.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/version-types.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/version.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/batchdeployer.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/logremover.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />		
+		<move file="${xlib_jar_dir}/commons-cli-1.2.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/commons-codec-1.15.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/gson-2.8.2.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/guava-31.0.1-jre.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/infinispan-client-hotrod-13.0.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/infinispan-commons-13.0.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/infinispan-core-13.0.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/infinispan-jboss-marshalling-13.0.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/log4j-api-2.17.1.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/log4j-core-2.17.1.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/shared.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/rms_shared.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/commons-lang3-3.12.0.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		
+		<move file="${xlib_jar_dir}/caffeine-2.8.4.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/infinispan-jboss-marshalling-13.0.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/jboss-logging-3.4.3.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/jboss-marshalling-osgi-2.0.12.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/jboss-transaction-api_1.2_spec-1.1.1.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/netty-buffer-4.1.63.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/netty-codec-4.1.63.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/netty-common-4.1.63.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/netty-handler-4.1.63.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/netty-resolver-4.1.63.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/netty-transport-4.1.63.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/netty-transport-native-epoll-4.1.63.Final-linux-x86_64.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/netty-transport-native-unix-common-4.1.63.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/protostream-4.4.1.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/reactive-streams-1.0.3.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/rxjava-3.0.4.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/wildfly-common-1.5.4.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/wildfly-elytron-asn1-1.17.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/wildfly-elytron-auth-1.17.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/wildfly-elytron-auth-server-1.17.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/wildfly-elytron-base-1.17.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/wildfly-elytron-credential-1.17.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/wildfly-elytron-http-1.17.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/wildfly-elytron-keystore-1.17.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/wildfly-elytron-mechanism-1.17.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/wildfly-elytron-mechanism-digest-1.17.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/wildfly-elytron-mechanism-gssapi-1.17.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/wildfly-elytron-mechanism-oauth2-1.17.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/wildfly-elytron-mechanism-scram-1.17.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/wildfly-elytron-password-impl-1.17.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/wildfly-elytron-permission-1.17.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/wildfly-elytron-provider-util-1.17.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/wildfly-elytron-sasl-1.17.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/wildfly-elytron-sasl-digest-1.17.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/wildfly-elytron-sasl-external-1.17.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/wildfly-elytron-sasl-gs2-1.17.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/wildfly-elytron-sasl-gssapi-1.17.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/wildfly-elytron-sasl-oauth2-1.17.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/wildfly-elytron-sasl-plain-1.17.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/wildfly-elytron-sasl-scram-1.17.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/wildfly-elytron-security-manager-action-1.17.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/wildfly-elytron-ssl-1.17.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_jar_dir}/wildfly-elytron-util-1.17.2.Final.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" />
+	</target>
+
+	<target name="prepare_external_java">
+		<copy file="${external.dir}/ant-contrib/ant-contrib-1.0b2/lib/ant-contrib.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" verbose="true" />
+		<copy file="${external.dir2}/ehcache/ehcache-3.0.2/ehcache-3.0.2.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" verbose="true" />
+		<copy file="${external.dir}/commons-logging/commons-logging-1.1.1/commons-logging-1.1.1.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" verbose="true" />
+		<copy file="${external.dir}/slf4j/slf4j-1.7.7/slf4j-api-1.7.7.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" verbose="true" />
+		<copy file="${external.dir}/commons-io/commons-io-2.4/commons-io-2.4.jar" todir="${xlib_jar_dir}" preservelastmodified="true" overwrite="false" verbose="true" />
+	</target>
+
+
+	<target name="prepare_installer_x86">
+		<mkdir dir="${xlib_bin32_dir}" />
+
+		<!-- Extract files -->
+		<unzip src="${xlib_installer_build_artifacts_xlib_bin_zip_file}" dest="${xlib_bin32_dir}" overwrite="yes">
+			<patternset>
+				<include name="bin/release_win_x86/InstallerCommon32.dll" />
+				<include name="bin/release_win_x86/Installer_CA32.dll" />
+				<include name="bin/release_win_x86/PA_CA32.dll" />
+			</patternset>
+			<mapper type="flatten" />
+		</unzip>
+
+		<!-- Check if file exists 
+		Notes: Currently, Unzip task or ZipFileSet does not have a way to report error if a file
+		cannot be found in a zip file. In addition, there is no simple way to check if a file 
+		exists in Ant. We can call out to Bash to check if a file exists, but that creates an
+		unnecessary dependency on Bash. In the following, we try to check if a file exist using
+		a fake move. Doing this, an error will be generated if a file does not exist.
+		-->
+		<move file="${xlib_bin32_dir}/InstallerCommon32.dll" todir="${xlib_bin32_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_bin32_dir}/Installer_CA32.dll" todir="${xlib_bin32_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_bin32_dir}/PA_CA32.dll" todir="${xlib_bin32_dir}" preservelastmodified="true" overwrite="false" />
+	</target>
+
+	<target name="prepare_installer_x64">
+		<mkdir dir="${xlib_bin64_dir}" />
+
+		<!-- Extract files -->
+		<!-- unzip src="${xlib_installer_build_artifacts_xlib_bin_zip_file}" dest="${xlib_bin64_dir}" overwrite="yes">
+			<patternset>
+				<include name="bin/release_win_x64/InstallerCommon.dll" />
+				<include name="bin/release_win_x64/Installer_CA.dll" />
+				<include name="bin/release_win_x64/PA_CA.dll" />
+			</patternset>
+			<mapper type="flatten" />
+		</unzip -->
+
+		<!-- Check if file exists 
+		Notes: Currently, Unzip task or ZipFileSet does not have a way to report error if a file
+		cannot be found in a zip file. In addition, there is no simple way to check if a file 
+		exists in Ant. We can call out to Bash to check if a file exists, but that creates an
+		unnecessary dependency on Bash. In the following, we try to check if a file exist using
+		a fake move. Doing this, an error will be generated if a file does not exist.
+		-->
+		<!-- move file="${xlib_bin64_dir}/InstallerCommon.dll" todir="${xlib_bin64_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_bin64_dir}/Installer_CA.dll" todir="${xlib_bin64_dir}" preservelastmodified="true" overwrite="false" />
+		<move file="${xlib_bin64_dir}/PA_CA.dll" todir="${xlib_bin64_dir}" preservelastmodified="true" overwrite="false" / -->
+	</target>
+
+	<target name="clean">
+		<delete dir="${xlib_dir}" />
+	</target>
+</project>

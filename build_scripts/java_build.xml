@@ -1,0 +1,128 @@
+<project name="java_build" xmlns:ivy="antlib:org.apache.ivy.ant"
+		 xmlns:nl="antlib:com.nextlabs.bnr.ant">
+
+	<dirname property="common.build.script.dir" file="${ant.file.java_build}"/>
+	<property name="nlbuildroot" location="${common.build.script.dir}/.." />
+
+	<import file="${common.build.script.dir}/common_build.xml" />
+
+  <target name="init" depends="common_build.init" description="Initialize build">
+	<nl:propertyFile dir="${common.build.script.dir}" fileName="java_build"/>	
+
+	<!-- Define Unit Test Macro -->
+	<!-- The macro allows sub builds to add classpath entries to the unit test execution -->
+	<macrodef name="unit_test" description="A macro for running unit tests on compiled java code">
+	  <element name="additionalclasspathentries" optional="true" />
+	  <element name="additionaljvmarguments" optional="true" />
+	  
+	  <sequential>
+        <ivy:cachepath pathid="emma.classpath" file="${common.build.script.dir}/java_build_ivy.xml" conf="emma" resolveId="emma_resolve_id"/>
+	    <taskdef resource="emma_ant.properties">
+	      <classpath refid="emma.classpath"/>
+	    </taskdef>
+
+        <mkdir dir="${test.output.dir}" />
+        <mkdir dir="${emma.report.dir}" />
+
+        <emma>
+          <instr instrpath="${build.main.classes.dir}"
+                 destdir="${emma.instr.dir}"	
+                 metadatafile="${emma.report.dir}/metadata.emma"
+                 merge="false"
+			     mode="fullcopy"
+				 />
+	    </emma>
+
+	    <ivy:cachepath pathid="test.classpath" conf="test" resolveId="${ant.project.name}"/>
+	    <junit printsummary="withOutAndErr" showoutput="yes" haltonfailure="${junit.haltonfailure}" failureproperty="junit.fail" fork="true">
+	      <formatter type="xml" />
+		  <test name="${test.suite.class}" todir="${test.output.dir}" />
+		  <classpath>
+	        <path refid="test.classpath"/>
+		    <path location="${emma.instr.dir}/classes" />
+		    <path location="${build.gen.classes.dir}" />
+			<path location="${build.test.classes.dir}" />
+			<path location="${build.test.resource.dir}" />
+			<path refid="emma.classpath" />
+			<additionalclasspathentries />
+		  </classpath>
+		  <jvmarg value="-Demma.coverage.out.file=${emma.report.dir}/coverage.ec" />
+		  <jvmarg value="-Demma.coverage.out.merge=false" />
+
+		  <!-- Set the build root, which is used in a number of our tests -->
+		  <jvmarg value="-Dbuild.root.dir=${build.root.dir}" />
+
+		  <additionaljvmarguments />
+	    </junit>
+
+		<junitreport todir="${test.output.dir}">
+		  <fileset dir="${test.output.dir}">
+		    <include name="TEST-*.xml"/>
+		  </fileset> 
+		  <report todir="${test.output.dir}"/>
+		</junitreport>
+
+	    <emma>
+          <report sourcepath="${src.main.dir}" depth="method">
+            <fileset dir="${emma.report.dir}" >
+              <include name="*.emma" />
+			  <include name="*.ec" />
+            </fileset>
+
+            <html outfile="${emma.report.dir}/coverage.html" />
+            <xml outfile="${emma.report.dir}/coverage.xml" />
+          </report>
+	    </emma>
+	  </sequential>
+	</macrodef>
+  </target>
+
+  <!-- Compile -->
+  <target name="compile" depends="pre_compile">
+	<antcall target="compile_main" inheritRefs="true"/>
+
+	<available property="compile.test.required" file="${src.test.dir}" />
+	<antcall target="compile_test" inheritRefs="true"/>
+  </target>
+
+  <target name="compile_main">
+	  <mkdir dir="${build.main.classes.dir}" />
+	
+	<ivy:cachepath transitive="false" pathid="main.classpath" conf="main" resolveId="${ant.project.name}" />
+	<javac srcdir="${src.main.dir}" destdir="${build.main.classes.dir}" fork="true" debug="${compile.debug}" verbose="${compile.verbose}" source="${compile.source}" executable="${compile.executable}">
+	  <classpath>
+		<path refid="main.classpath"/>
+		<path location="${build.gen.classes.dir}" />
+		  <fileset dir="${nlbuildroot}/xlib/jar">
+			  <include name="*.jar" />
+		  </fileset>
+	  </classpath>
+	</javac>
+  </target>
+
+  <target name="compile_test" if="compile.test.required">
+	<mkdir dir="${build.test.classes.dir}" />
+
+	<ivy:cachepath transitive="false" pathid="test.classpath" conf="test" resolveId="${ant.project.name}"/>
+	<javac srcdir="${src.test.dir}" destdir="${build.test.classes.dir}" fork="true" debug="${compile.debug}" verbose="${compile.verbose}" source="${compile.source}" executable="${compile.executable}">
+	  <classpath>
+		<path refid="test.classpath"/>
+		<path location="${build.main.classes.dir}" />
+		<path location="${build.gen.classes.dir}" />
+		  <fileset dir="${nlbuildroot}/xlib/jar">
+			  <include name="*.jar" />
+		  </fileset>
+	  </classpath>
+	</javac>
+  </target>
+
+  <target name="test" depends="resolve">
+	<unit_test />
+  </target>
+
+  <target name="package" depends="copy_resource, compile" if="jar.file.name">
+	<jar destfile="${build.dir}/${jar.file.name}">
+	  <fileset dir="${build.main.classes.dir}" />
+	</jar>
+  </target>
+</project>

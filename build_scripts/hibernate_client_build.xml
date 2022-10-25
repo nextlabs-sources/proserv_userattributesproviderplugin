@@ -1,0 +1,32 @@
+<project name="hibernate_client_build" xmlns:ivy="antlib:org.apache.ivy.ant" xmlns:nl="antlib:com.nextlabs.bnr.ant">
+  <dirname property="common.build.script.dir" file="${ant.file.java_build}"/>
+
+  <import file="${common.build.script.dir}/java_build.xml" />	
+
+  <target name="init" depends="java_build.init" description="Initialize build">
+	<nl:propertyFile dir="${common.build.script.dir}" fileName="hibernate_client"/>	
+  </target>
+
+  <target name="copy_resource"
+		  depends="common_build.copy_resource">
+    <copy todir="${build.main.hibernate.dir}">
+      <fileset dir="${src.main.hibernate.dir}" />	  
+	</copy>
+  </target>
+
+  <target name="test" depends="resolve">
+    <unit_test>
+	  <additionalclasspathentries>
+	    <!-- Add the hibernate definition file to the unit test classpath -->
+	    <path location="${build.main.hibernate.dir}" />
+	  </additionalclasspathentries>
+	</unit_test>
+  </target>
+
+  <target name="package" depends="copy_resource, compile">
+    <jar destfile="${build.dir}/${jar.file.name}">
+      <fileset dir="${build.main.classes.dir}" />
+      <fileset dir="${build.main.hibernate.dir}" />
+    </jar>
+  </target>
+</project>

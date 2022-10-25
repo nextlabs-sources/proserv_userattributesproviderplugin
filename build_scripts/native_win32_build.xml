@@ -1,0 +1,21 @@
+<project name="native_win32_build" xmlns:ivy="antlib:org.apache.ivy.ant"
+		 xmlns:nl="antlib:com.nextlabs.bnr.ant">
+  <dirname property="common.build.script.dir" file="${ant.file.java_build}"/>
+
+  <import file="${common.build.script.dir}/common_build.xml" />
+
+  <target name="init" depends="common_build.init" description="Initialize build">
+	<nl:propertyFile dir="${common.build.script.dir}" fileName="native_win32_build"/>	
+  </target>
+
+  <!-- Compile -->
+  <target name="compile" depends="pre_compile">
+	<exec dir="${src.main.native.win32.dir}" executable="cmd.exe" failonerror="true">
+	  <arg line="/c &quot;${native.win32.compile.executable}&quot; /rebuild release ${src.main.native.win32.dir}/${native.win32.vs.sln}"/>
+	</exec>
+	<exec dir="${src.main.native.win32.dir}" executable="cmd.exe" failonerror="true">
+	  <arg line="/c &quot;${native.win32.compile.executable}&quot; /rebuild debug ${src.main.native.win32.dir}/${native.win32.vs.sln}"/>
+	</exec>
+  </target>
+
+</project>

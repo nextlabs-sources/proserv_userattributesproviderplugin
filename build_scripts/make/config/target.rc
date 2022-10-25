@@ -1,0 +1,40 @@
+;
+; Template for Binary Resource File
+;
+; Do not modify this file directly to update version information.  The Makefile.inc
+; of targets may override these.
+;
+;
+; NextLabs, Inc.      Product (i.e. Enforcer for Microsoft Outlook)
+; 4        Major product version (i.e. 4)
+; 5        Minor product version (i.e. 4.1)
+; 0     Sub-minor version (i.e. 4.1.1)
+; 0  Sub-sub-minor version (i.e. 4.1.1.1)
+; -1        Build number (i.e. 12)
+;
+
+
+1 VERSIONINFO
+ FILEVERSION 4, 5, 0, 0
+ PRODUCTVERSION 4, 5, 0, 0
+ FILEFLAGSMASK 0x3f
+ FILEOS 0x40004
+ FILETYPE 0x2
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904B0"
+    BEGIN
+      VALUE "CompanyName",     "NextLabs, Inc."
+      VALUE "FileDescription", "NextLabs, Inc."
+      VALUE "FileVersion",     "4.5.0.0 (-1)"
+      VALUE "LegalCopyright", L"NextLabs, Inc. All rights reserved."
+      VALUE "ProductName",    L"NextLabs, Inc."
+      VALUE "ProductVersion",  "4.5.0.0 (-1)"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x409, 1200
+  END
+END

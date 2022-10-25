@@ -1,0 +1,32 @@
+<project name="jni_build" xmlns:ivy="antlib:org.apache.ivy.ant"
+		 xmlns:nl="antlib:com.nextlabs.bnr.ant">
+
+  <import file="${common.build.script.dir}/java_build.xml" />
+
+  <target name="init" depends="common_build.init" description="Initialize build">
+	<nl:propertyFile dir="${common.build.script.dir}" fileName="jni_build"/>	
+  </target>
+
+  <target name="compile" depends="java_build.compile">
+    <mkdir dir="${build.main.jni.include.dir}" />
+    
+	<ivy:cachepath transitive="false" pathid="main.classpath" conf="main" resolveId="${ant.project.name}" />
+    
+	<propertyselector property="jni.class.list" delimiter="," match="jni\.class.*" distinct="true" />
+	<foreach list="${jni.class.list}" 
+			 param="jni.class.property.name" 
+			 target="compile_impl" 
+			 inheritAll="true"
+			 inheritrefs="true"/>
+  </target>
+
+  <target name="compile_impl">
+    <propertycopy property="jni.class" from="${jni.class.property.name}" />
+	<javah destdir="${build.main.jni.include.dir}" class="${jni.class}" verbose="${compile.verbose}">
+	  <classpath>
+	    <path refid="main.classpath"/>
+		<pathelement path="${build.main.classes.dir}" />
+	  </classpath>
+	</javah>	   
+  </target>
+</project>

@@ -1,0 +1,38 @@
+<project name="build_project_dependencies" xmlns:ivy="antlib:org.apache.ivy.ant"
+		 xmlns:nl="antlib:com.nextlabs.bnr.ant">
+  <dirname property="common.build.script.dir" file="${ant.file.common_build}"/>
+
+  <target name="init" depends="common_build.init" description="Initialize build">
+	<nl:propertyFile dir="${common.build.script.dir}" fileName="build_project_dependencies"/>	
+
+	<macrodef name="buildDependenciesOfProjects">
+	  <element name="targets" />
+	  <sequential>
+		<subant failonerror="true"
+				inheritall="false"
+				inheritrefs="false"
+				verbose="true"
+				buildpath="${build_project_dependencies.build.basedirlist}">
+		  <targets />
+		</subant>	 
+	  </sequential> 
+	</macrodef>
+  </target>
+
+  <target name="build" if="build_project_dependencies.build.basedirlist">
+    <buildDependenciesOfProjects>
+	  <targets>
+	    <target name="build" />
+	  </targets>
+	</buildDependenciesOfProjects>
+  </target>
+
+  <target name="rebuild" if="build_project_dependencies.build.basedirlist">
+    <buildDependenciesOfProjects>
+	  <targets>
+	    <target name="rebuild" />
+	  </targets>
+	</buildDependenciesOfProjects>
+  </target>
+
+</project>

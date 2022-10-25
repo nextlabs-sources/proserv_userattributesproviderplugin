@@ -1,0 +1,38 @@
+<project name="multi_project_build" xmlns:ivy="antlib:org.apache.ivy.ant" xmlns:nl="antlib:com.nextlabs.bnr.ant">
+  <dirname property="common.build.script.dir" file="${ant.file.common_build}"/>
+
+  <target name="init" depends="common_build.init" description="Initialize build">
+	<nl:propertyFile dir="${common.build.script.dir}" fileName="multi_project_build"/>	
+  </target>
+
+  <macrodef name="runTargetsOnProjects">
+    <element name="targets" />
+	<sequential>
+      <subant failonerror="true"
+		      inheritall="false"
+			  inheritrefs="false"
+			  verbose="true"
+			  buildpath="${multi_project.build.basedirlist}">
+	    <targets />
+	  </subant>	 
+    </sequential> 
+  </macrodef>
+
+  <target name="build" if="multi_project.build.basedirlist">
+    <runTargetsOnProjects>
+	  <targets>
+	    <target name="build" />
+	    <target name="publish_locally" />
+	  </targets>
+	</runTargetsOnProjects>
+  </target>
+
+  <target name="clean" if="multi_project.build.basedirlist">
+    <runTargetsOnProjects>
+	  <targets>
+	    <target name="clean" />
+	  </targets>
+	</runTargetsOnProjects>
+  </target>
+
+</project>

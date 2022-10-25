@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivy-module version="1.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:noNamespaceSchemaLocation=
+                  "http://incubator.apache.org/ivy/schemas/ivy.xsd">
+       <info organisation="nextlabs" module="obfuscator_build" revision="1.0"/>
+       <configurations>
+	    <conf name="obfuscate" visibility="private" />
+	</configurations>
+	<publications>
+	</publications>
+	<dependencies>
+                <dependency org="allatori" name="obfuscator" rev="2.5" conf="obfuscate->default" />
+	</dependencies>
+</ivy-module>

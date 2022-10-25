@@ -1,0 +1,48 @@
+<project name="webapp_build" xmlns:ivy="antlib:org.apache.ivy.ant" 
+		 xmlns:nl="antlib:com.nextlabs.bnr.ant">
+  <dirname property="common.build.script.dir" file="${ant.file.java_build}"/>
+
+  <import file="${common.build.script.dir}/java_build.xml" />	
+
+  <target name="init" depends="common_build.init" description="Initialize build">
+	<nl:propertyFile dir="${common.build.script.dir}" fileName="webapp_build"/>	
+  </target>
+
+  <target name="package" depends="copy_resource, compile">
+    <!-- Copy built classes to the WEB-INF/classes directory -->
+    <copy todir="${build.main.webapp.dir}/WEB-INF/classes">
+      <fileset dir="${build.main.classes.dir}" />
+      <fileset dir="${build.gen.classes.dir}" />	  
+	</copy>
+
+	<!--  Copy all dependent libraries to the lib directory -->
+	<ivy:retrieve pattern="${build.main.webapp.dir}/WEB-INF/lib/[artifact].[ext]"
+	              conf="main"
+				  type="jar"
+				  resolveId="${ant.project.name}"/>
+
+	<!-- Copy web.xml from resources dir -->
+	<copy todir="${build.main.webapp.dir}/WEB-INF" file="${build.main.resource.dir}/web.xml" />
+	
+	<if>
+	  <equals arg1="${wsdl_build.present}" arg2="true" />
+      <then>
+	    <copy todir="${build.main.webapp.dir}/WEB-INF" 
+		      file="${build.wsdl.temp.dir}/server-config.wsdd" />      
+      </then>
+    </if>
+
+	<if>
+	  <equals arg1="${hibernate_client_build.present}" arg2="true" />
+      <then>
+	    <copy todir="${build.main.webapp.dir}/WEB-INF/conf">
+		  <fileset dir="${build.main.hibernate.dir}" includes="*.repository.xml" />
+		</copy> 
+      </then>
+    </if>
+
+    <war destfile="${build.dir}/${war.file.name}" 
+	     basedir="${build.main.webapp.dir}" 
+		 webxml="${build.main.webapp.dir}/WEB-INF/web.xml"/>
+  </target>
+</project>

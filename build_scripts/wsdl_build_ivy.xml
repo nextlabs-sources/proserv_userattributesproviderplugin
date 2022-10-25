@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivy-module version="1.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:noNamespaceSchemaLocation=
+                  "http://incubator.apache.org/ivy/schemas/ivy.xsd">
+    <info organisation="nextlabs"
+          module="wsdl_build"
+		  revision="2.0"/>
+    <configurations>
+	    <conf name="ant" visibility="private" />
+	</configurations>
+	<publications>
+	</publications>
+	<dependencies>
+	    <dependency org="nextlabs" name="securewsdl2java" rev="0.1" conf="*->default" />
+	    <dependency org="apache" name="axis" rev="1.2" conf="*->ant" />
+	</dependencies>
+</ivy-module>

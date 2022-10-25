@@ -1,0 +1,113 @@
+<project name="native_make_build" xmlns:ivy="antlib:org.apache.ivy.ant"
+		 xmlns:nl="antlib:com.nextlabs.bnr.ant">
+  <dirname property="common.build.script.dir" file="${ant.file.native_make_build}"/>
+
+  <import file="${common.build.script.dir}/common_build.xml" />
+
+  <property name="project.root.dir" value="${common.build.script.dir}/../"/>
+
+  <target name="init" depends="common_build.init" description="Initialize build">
+	<nl:propertyFile dir="${common.build.script.dir}" fileName="native_make_build"/>	
+
+	<!-- convert the common build script path to forward slashes -->
+	<path id="common.build.script.dir.path"> 
+	  <pathelement path="${common.build.script.dir}" /> 
+	</path> 
+	<pathconvert targetos="unix" property="common.build.script.dir.forward.slashes" refid="common.build.script.dir.path"/>
+
+	<pathconvert dirsep="/" property="external.dir.forward.slashes">
+      <path path="${external.dir}" />
+	</pathconvert>
+	<pathconvert dirsep="/" property="project.root.dir.forward.slashes">
+	  <path path="${project.root.dir}" />
+	</pathconvert>
+	<pathconvert dirsep="/" property="enforcers.dir.forward.slashes">
+	  <path path="${enforcers.dir}" />
+	</pathconvert>
+
+	<!-- dfinition of make to make the modules of type debug and release -->
+	<macrodef name="make">
+	  <attribute name="dir" />
+	  <attribute name="targetenv" />
+	  <sequential>
+		<exec failonerror="true" executable="${make.command}" dir="@{dir}">
+		  <arg value="arg1=${project.root.dir.forward.slashes}" />
+		  <arg value="arg2=${external.dir.forward.slashes}" />
+		  <arg value="enforcersdir=${enforcers.dir.forward.slashes}" />
+		  <arg value="TARGETENV=@{targetenv}" />
+		  <arg value="BUILDTYPE=debug" />
+                  <env key="NLENFORCERSDIR" value="${enforcers.dir.forward.slashes}" />
+                  <env key="NLEXTERNALDIR" value="${external.dir.forward.slashes}" />
+		</exec>	
+
+		<exec failonerror="true" executable="${make.command}" dir="@{dir}">
+		  <arg value="arg1=${project.root.dir.forward.slashes}" />
+		  <arg value="arg2=${external.dir.forward.slashes}" />
+		  <arg value="enforcersdir=${enforcers.dir.forward.slashes}" />
+		  <arg value="TARGETENV=@{targetenv}" />
+		  <arg value="BUILDTYPE=release" />
+                  <env key="NLENFORCERSDIR" value="${enforcers.dir.forward.slashes}" />
+                  <env key="NLEXTERNALDIR" value="${external.dir.forward.slashes}" />
+ 		</exec>	
+	  </sequential>
+	</macrodef>
+
+
+	<!-- dfinition of make to make the modules of type debug and release -->
+	<macrodef name="makeclean">
+	  <attribute name="dir" />
+	  <sequential>
+		<exec failonerror="true" executable="${make.command}" dir="@{dir}">
+		  <arg value="arg1=${project.root.dir.forward.slashes}" />
+		  <arg value="arg2=${external.dir.forward.slashes}" />
+		  <arg value="enforcersdir=${enforcers.dir.forward.slashes}" />
+		  <arg value="-B" />
+		  <arg value="BUILDTYPE=debug" />
+		  <arg value="clean" />
+                  <env key="NLENFORCERSDIR" value="${enforcers.dir.forward.slashes}" />
+                  <env key="NLEXTERNALDIR" value="${external.dir.forward.slashes}" />		</exec>	
+		
+		<exec failonerror="true" executable="${make.command}" dir="@{dir}">
+		  <arg value="arg1=${project.root.dir.forward.slashes}" />
+		  <arg value="arg2=${external.dir.forward.slashes}" />
+		  <arg value="enforcersdir=${enforcers.dir.forward.slashes}" />
+		  <arg value="-B" />
+		  <arg value="BUILDTYPE=release" />
+		  <arg value="clean" />
+                  <env key="NLENFORCERSDIR" value="${enforcers.dir.forward.slashes}" />
+                  <env key="NLEXTERNALDIR" value="${external.dir.forward.slashes}" /> 		</exec>	
+	  </sequential>
+	</macrodef>
+	
+	<!-- dfinition to create uptodate task which tells whether the project is uptodate or not -->
+	<macrodef name="uptodateTask">
+	  <attribute name="srcdir" />
+	  <attribute name="destdir" /> 
+	  <attribute name="artifact" /> 
+	  <sequential>
+		<uptodate property="compile.notRequired">
+		  <srcfiles dir="@{srcdir}" includes="**" />
+		  <mergemapper from="*" to="@{destdir}\@{artifact}" /> 
+		</uptodate>
+	  </sequential>
+	</macrodef> 
+  </target>
+
+  <target name="compile_for_targetenv" depends="pre_compile">
+	<make dir="${src.dir}" targetenv="${targetenv}"/>
+  </target>
+
+  <!-- Deprecated.  Previously used for platform builds -->
+  <target name="publish_local" depends="resolve">
+	
+	<!-- temporary as the build is further transformed to IVY -->
+	<ivy:publish artifactspattern="${src.artifact.dir}/[type]/[artifact].[ext]"
+				 resolver="native-build-repository"
+				 overwrite="true"
+				 forcedeliver="true"
+				 publishivy="false"
+				 /> <!-- Need a way to specify all but "report" for confs-->
+	
+  </target>
+  
+</project>

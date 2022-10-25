@@ -1,0 +1,75 @@
+<!-- Note - This build file will build files which may not need to be built (i.e. they're build artifacts are up to data.  This should be fixed if there is a lot of time on a developers hands, as this build file won't be used often -->
+<project name="installscript_build" xmlns:ivy="antlib:org.apache.ivy.ant" 
+		 xmlns:nl="antlib:com.nextlabs.bnr.ant">
+  <dirname property="common.build.script.dir" file="${ant.file.installscript_build}"/>
+
+  <import file="${common.build.script.dir}/common_build.xml" />
+
+  <target name="init" depends="common_build.init" description="Initialize build">
+	<nl:propertyFile dir="${common.build.script.dir}" fileName="installscript_build"/>	
+  </target>
+
+  <!-- Pre-Compile -->
+  <target name="pre_compile" 
+          description="Perform any necessary steps required before compile, such as code generation" 
+          depends="resolve">
+
+	<copy todir="${build.temp.rul.dir}">
+	  <fileset dir="${src.main.rul.dir}" />
+	</copy>
+
+	<!-- Download include files (may also get C++ include files, but that's okay -->
+    <mkdir dir="${build.temp.rul.dir}" />
+    <mkdir dir="${build.temp.rul.dir}/include" />
+	<ivy:retrieve pattern="${build.temp.rul.dir}/include/([releasetype]_)([os]_)([arch])/[artifact].[ext]"
+				  conf="main"
+				  type="h" 
+				  resolveId="${ant.project.name}"/>		  
+  </target>
+
+  <!-- Compile -->
+  <target name="compile" depends="pre_compile">
+    <mkdir dir="${build.main.obs.dir}" />
+	
+	<!-- Note:  The mapper used below is a little strange.  It was the only way to achieve the required command line syntax of having no space between the "-o" argument and the target location -->
+	<apply executable="${installscript.compiler.exe}" 
+		   dest="${build.main.obs.dir}" 
+		   dir="${build.temp.rul.dir}" 
+		   relative="true">
+	  <srcfile/>
+      <arg line="-c"/>
+      <arg line="-i&quot;${installshield.home}/Script/Iswi/Include;${installshield.home}/Script/Isrt/Include&quot;"/>
+	  <targetfile/>
+      <fileset dir="${build.temp.rul.dir}">
+		<include name="*.rul" />
+	  </fileset>
+	  <mapper type="glob" from="*.rul" to="-o${build.main.obs.dir}/*.obs"/>
+	</apply>
+
+  </target>
+
+  <target name="package" depends="copy_resource, compile" if="obl.file.name">
+	<apply executable="${installscript.compiler.exe}" 
+		   dest="${build.dir}" 
+		   dir="${build.main.obs.dir}" 
+		   relative="true"
+		   parallel="true">
+	  <srcfile/>
+      <arg line="-l"/>
+	  <arg line="-o${build.dir}/${obl.file.name}.obl" />
+      <fileset dir="${build.main.obs.dir}">
+		<include name="*.obs" />
+	  </fileset>
+	  <mapper type="glob" from="*.obs" to="*.obl"/>
+	</apply>
+
+	<!-- Copy .h files -->
+	<copy todir="${build.dir}">
+	  <fileset dir="${src.main.rul.dir}">
+		<include name="*.h" />
+	  </fileset>
+	</copy>
+
+  </target>
+
+</project>

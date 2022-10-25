@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivy-module version="1.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:noNamespaceSchemaLocation=
+                  "http://incubator.apache.org/ivy/schemas/ivy.xsd">
+    <info organisation="nextlabs"
+          module="common_build"
+		  revision="2.0"/>
+    <configurations>
+	    <conf name="ant-contrib" visibility="private" />
+	    <conf name="antlion" visibility="private" />
+    </configurations>
+	<publications>
+	</publications>
+	<dependencies>
+	    <dependency org="ant-contrib" name="ant-contrib" rev="1.0b3" conf="ant-contrib->default" />
+	    <dependency org="antlion" name="antlion" rev="0.9.0" conf="antlion->default" />
+	</dependencies>
+</ivy-module>

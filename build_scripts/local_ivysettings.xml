@@ -1,0 +1,16 @@
+<ivysettings>
+    <properties file="${ivy.settings.dir}/local_ivy.properties"/>
+
+    <resolvers>
+      <chain name="local-repository">
+        <filesystem name="product" checkmodified="true" changingPattern=".*">
+	      <ivy pattern="${local.repository.root}/${local.repository.product.ivy.file.pattern}" />
+          <artifact pattern="${local.repository.root}/${local.repository.product.artifact.pattern}" />
+	    </filesystem>
+<!--        <filesystem name="modules">
+	      <ivy pattern="${local.repository.root}/${module.ivy.file.pattern}" />
+          <artifact pattern="${local.repository.root}/${module.artifact.pattern}" />
+	    </filesystem> -->
+      </chain>
+    </resolvers>
+</ivysettings>

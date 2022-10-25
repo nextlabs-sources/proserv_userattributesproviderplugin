@@ -1,0 +1,47 @@
+<ivysettings>
+    <properties file="${ivy.settings.dir}/ivy.properties"/>
+
+	<!-- Note that we turn off validation because we use the "extra attributes" feature -->
+    <settings defaultResolver="default-resolver" 
+			  circularDependencyStrategy="error"
+			  validate="false"/>
+
+    <include file="${ivy.repository.dir}/ivysettings.xml" />
+    <include file="${ivy.settings.dir}/local_ivysettings.xml" />
+
+	<caches default="thedefault" useOrigin="true" >  
+	  <cache name="thedefault" artifactPattern="[organisation]/[module]/[type]s/([releasetype]_)([os]_)([arch])/([compiler])/[artifact]-[revision].[ext]" />  
+	</caches> 
+
+	<latest-strategies>
+	     <latest-revision name="latest-revision">
+		    <!-- Note!  At the moment, this isn't being used, since in order for it to work, both revisions being compared must have a special meaning word in it.  e.g. if comparing dev2.5 to 2.5, the 2.5 will always win because it is a pure number, despite the fact that the value of dev is 1000000 -->
+		    <!-- Used for resolution of dev builds to local repository for those on the file server (i.e. multi-build -->
+            <specialMeaning name="dev" value="100000"/> 
+        </latest-revision>
+    </latest-strategies>
+
+	<resolvers>
+         <chain name="default-resolver">
+	          <filesystem ref="externals64-repository"/>
+	          <filesystem ref="local-repository"/>
+	          <filesystem ref="nextlabs-build-repository"/>
+			  <filesystem ref="nextlabs-milestones-repository"/>
+			  <filesystem ref="nextlabs-release-repository"/>
+	          <filesystem name="build-repository" checkmodified="true" changingPattern=".*">
+			       <ivy pattern="${build.root.dir}/[module]/ivy-[revision].xml" />
+		           <artifact pattern="${build.root.dir}/[module]/[artifact].[ext]" />
+		      </filesystem>
+		 </chain>
+
+         <filesystem name="build-report-repository">
+	           <artifact pattern="${build.root.dir}/report/[module]/[artifact].[ext]" />
+	      </filesystem>
+
+		 <!-- Temporary -->
+		 <filesystem name="temp-build-repository" checkmodified="true" changingPattern=".*">
+		      <artifact pattern="${build.root.dir}/[artifact].[ext]" />
+		 </filesystem>
+
+	</resolvers> 
+</ivysettings>

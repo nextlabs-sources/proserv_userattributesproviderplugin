@@ -1,0 +1,109 @@
+<project name="UserAttributesPlugin" default="all" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
+	<property name="nlbuildroot" location="${basedir}/.." />
+
+	<property file="${nlbuildroot}/scripts/build.properties" />
+	<property file="${nlbuildroot}/scripts/build_common.properties" />
+	<property name="build_dir" value="${nlbuildroot}/build" />
+	<property name="docs_dir" value="${nlbuildroot}/docs" />
+	<property name="package_dir" value="${build_dir}/${package_name}" />
+	<property name="dist_zip_file_name" value="${package_name}-${version_str}-${version_build_short}-${build_date_long}.zip" />
+
+	<echo message="xlib_jar_dir = ${xlib_jar_dir}" />
+	<taskdef resource="net/sf/antcontrib/antlib.xml">
+		<classpath>
+			<pathelement location="${xlib_jar_dir}/ant-contrib.jar" />
+		</classpath>
+	</taskdef>
+
+	<!-- Targets -->
+	<target name="all" description="Default for all" depends="clean, compile, package" />
+
+	<target name="clean" description="Delete all build artifacts" depends="">
+		<delete includeemptydirs="true" dir="${build_dir}" />
+	</target>
+
+
+	<target name="compile">
+		<mkdir dir="${nlbuildroot}/build" />
+		<ant dir="${nlbuildroot}/src/common" target="build" inheritRefs="true" />
+		<ant dir="${nlbuildroot}/src/server" target="build" inheritRefs="true" />
+		<ant dir="${nlbuildroot}/src/client" target="build" inheritRefs="true" />
+	</target>
+
+	<target name="package" description="package the plugins">
+		<mkdir dir="${package_dir}" />		
+		
+		<copy file="${build_dir}/UserAttributesServerV2.jar" tofile="${package_dir}/Control Center/UserAttributesServer-${version_str}.jar" overwrite="true" />
+		<copy file="${nlbuildroot}/etc/UserAttributesServerV2.properties" tofile="${package_dir}/Control Center/UserAttributesServer.properties" overwrite="true" />
+		
+		<copy file="${build_dir}/UserAttributesClient.jar" tofile="${package_dir}/Policy Controller/UserAttributesClient-${version_str}.jar" overwrite="true" />
+		<copy file="${nlbuildroot}/etc/UserAttributesClient.properties" tofile="${package_dir}/Policy Controller/UserAttributesClient.properties" overwrite="true" />
+		
+		<copy file="${xlib_jar_dir}/commons-cli-1.2.jar" tofile="${package_dir}/ext/commons-cli-1.2.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/commons-codec-1.15.jar" tofile="${package_dir}/ext/commons-codec-1.15.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/gson-2.8.2.jar" tofile="${package_dir}/ext/gson-2.8.2.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/guava-31.0.1-jre.jar" tofile="${package_dir}/ext/guava-31.0.1-jre.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/infinispan-client-hotrod-13.0.2.Final.jar" tofile="${package_dir}/ext/infinispan-client-hotrod-13.0.2.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/infinispan-commons-13.0.2.Final.jar" tofile="${package_dir}/ext/infinispan-commons-13.0.2.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/infinispan-core-13.0.2.Final.jar" tofile="${package_dir}/ext/infinispan-core-13.0.2.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/log4j-api-2.17.1.jar" tofile="${package_dir}/ext/log4j-api-2.17.1.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/log4j-core-2.17.1.jar" tofile="${package_dir}/ext/log4j-core-2.17.1.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/shared.jar" tofile="${package_dir}/ext/shared.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/rms_shared.jar" tofile="${package_dir}/ext/rms_shared.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/commons-lang3-3.12.0.jar" tofile="${package_dir}/ext/commons-lang3-3.12.0.jar" overwrite="true" />
+		
+		<copy file="${xlib_jar_dir}/caffeine-2.8.4.jar" tofile="${package_dir}/ext/caffeine-2.8.4.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/infinispan-jboss-marshalling-13.0.2.Final.jar" tofile="${package_dir}/ext/infinispan-jboss-marshalling-13.0.2.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/jboss-logging-3.4.3.Final.jar" tofile="${package_dir}/ext/jboss-logging-3.4.3.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/jboss-marshalling-osgi-2.0.12.Final.jar" tofile="${package_dir}/ext/jboss-marshalling-osgi-2.0.12.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/jboss-transaction-api_1.2_spec-1.1.1.Final.jar" tofile="${package_dir}/ext/jboss-transaction-api_1.2_spec-1.1.1.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/netty-buffer-4.1.63.Final.jar" tofile="${package_dir}/ext/netty-buffer-4.1.63.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/netty-codec-4.1.63.Final.jar" tofile="${package_dir}/ext/netty-codec-4.1.63.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/netty-common-4.1.63.Final.jar" tofile="${package_dir}/ext/netty-common-4.1.63.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/netty-handler-4.1.63.Final.jar" tofile="${package_dir}/ext/netty-handler-4.1.63.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/netty-resolver-4.1.63.Final.jar" tofile="${package_dir}/ext/netty-resolver-4.1.63.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/netty-transport-4.1.63.Final.jar" tofile="${package_dir}/ext/netty-transport-4.1.63.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/netty-transport-native-epoll-4.1.63.Final-linux-x86_64.jar" tofile="${package_dir}/ext/netty-transport-native-epoll-4.1.63.Final-linux-x86_64.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/netty-transport-native-unix-common-4.1.63.Final.jar" tofile="${package_dir}/ext/netty-transport-native-unix-common-4.1.63.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/protostream-4.4.1.Final.jar" tofile="${package_dir}/ext/protostream-4.4.1.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/reactive-streams-1.0.3.jar" tofile="${package_dir}/ext/reactive-streams-1.0.3.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/rxjava-3.0.4.jar" tofile="${package_dir}/ext/rxjava-3.0.4.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/wildfly-common-1.5.4.Final.jar" tofile="${package_dir}/ext/wildfly-common-1.5.4.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/wildfly-elytron-asn1-1.17.2.Final.jar" tofile="${package_dir}/ext/wildfly-elytron-asn1-1.17.2.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/wildfly-elytron-auth-1.17.2.Final.jar" tofile="${package_dir}/ext/wildfly-elytron-auth-1.17.2.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/wildfly-elytron-auth-server-1.17.2.Final.jar" tofile="${package_dir}/ext/wildfly-elytron-auth-server-1.17.2.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/wildfly-elytron-base-1.17.2.Final.jar" tofile="${package_dir}/ext/wildfly-elytron-base-1.17.2.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/wildfly-elytron-credential-1.17.2.Final.jar" tofile="${package_dir}/ext/wildfly-elytron-credential-1.17.2.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/wildfly-elytron-http-1.17.2.Final.jar" tofile="${package_dir}/ext/wildfly-elytron-http-1.17.2.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/wildfly-elytron-keystore-1.17.2.Final.jar" tofile="${package_dir}/ext/wildfly-elytron-keystore-1.17.2.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/wildfly-elytron-mechanism-1.17.2.Final.jar" tofile="${package_dir}/ext/wildfly-elytron-mechanism-1.17.2.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/wildfly-elytron-mechanism-digest-1.17.2.Final.jar" tofile="${package_dir}/ext/wildfly-elytron-mechanism-digest-1.17.2.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/wildfly-elytron-mechanism-gssapi-1.17.2.Final.jar" tofile="${package_dir}/ext/wildfly-elytron-mechanism-gssapi-1.17.2.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/wildfly-elytron-mechanism-oauth2-1.17.2.Final.jar" tofile="${package_dir}/ext/wildfly-elytron-mechanism-oauth2-1.17.2.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/wildfly-elytron-mechanism-scram-1.17.2.Final.jar" tofile="${package_dir}/ext/wildfly-elytron-mechanism-scram-1.17.2.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/wildfly-elytron-password-impl-1.17.2.Final.jar" tofile="${package_dir}/ext/wildfly-elytron-password-impl-1.17.2.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/wildfly-elytron-permission-1.17.2.Final.jar" tofile="${package_dir}/ext/wildfly-elytron-permission-1.17.2.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/wildfly-elytron-provider-util-1.17.2.Final.jar" tofile="${package_dir}/ext/wildfly-elytron-provider-util-1.17.2.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/wildfly-elytron-sasl-1.17.2.Final.jar" tofile="${package_dir}/ext/wildfly-elytron-sasl-1.17.2.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/wildfly-elytron-sasl-digest-1.17.2.Final.jar" tofile="${package_dir}/ext/wildfly-elytron-sasl-digest-1.17.2.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/wildfly-elytron-sasl-external-1.17.2.Final.jar" tofile="${package_dir}/ext/wildfly-elytron-sasl-external-1.17.2.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/wildfly-elytron-sasl-gs2-1.17.2.Final.jar" tofile="${package_dir}/ext/wildfly-elytron-sasl-gs2-1.17.2.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/wildfly-elytron-sasl-gssapi-1.17.2.Final.jar" tofile="${package_dir}/ext/wildfly-elytron-sasl-gssapi-1.17.2.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/wildfly-elytron-sasl-oauth2-1.17.2.Final.jar" tofile="${package_dir}/ext/wildfly-elytron-sasl-oauth2-1.17.2.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/wildfly-elytron-sasl-plain-1.17.2.Final.jar" tofile="${package_dir}/ext/wildfly-elytron-sasl-plain-1.17.2.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/wildfly-elytron-sasl-scram-1.17.2.Final.jar" tofile="${package_dir}/ext/wildfly-elytron-sasl-scram-1.17.2.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/wildfly-elytron-security-manager-action-1.17.2.Final.jar" tofile="${package_dir}/ext/wildfly-elytron-security-manager-action-1.17.2.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/wildfly-elytron-ssl-1.17.2.Final.jar" tofile="${package_dir}/ext/wildfly-elytron-ssl-1.17.2.Final.jar" overwrite="true" />
+		<copy file="${xlib_jar_dir}/wildfly-elytron-util-1.17.2.Final.jar" tofile="${package_dir}/ext/wildfly-elytron-util-1.17.2.Final.jar" overwrite="true" />
+		
+		<copy file="${docs_dir}/readme.pdf" tofile="${package_dir}/readme.pdf" overwrite="true" />
+		
+		<zip destfile="${build_dir}/${dist_zip_file_name}" encoding="UTF-8">
+			<fileset dir="${package_dir}/">
+				<include name="**/*.*" />
+			</fileset>
+		</zip>
+
+	</target>
+
+</project>

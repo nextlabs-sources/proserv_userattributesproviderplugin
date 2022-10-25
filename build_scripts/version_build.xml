@@ -1,0 +1,79 @@
+<project name="version_build" xmlns:ivy="antlib:org.apache.ivy.ant">
+  <dirname property="common.build.script.dir" file="${ant.file.version_build}"/>
+
+  <import file="${common.build.script.dir}/common_build.xml" />
+
+  <!-- The current build number.  Defaults to -1.  Set build.number property in calling script to set it to a meaningful value -->
+  <property name="build.number" value="-1" />
+
+  <target name="create_version_properties" depends="common_build.init">
+    <ivy:retrieve inline="true"
+	              organisation="apache" 
+	              module="jakarta-oro" 
+				  revision="2.0.8"
+				  pattern="${user.home}/.ant/lib/[artifact].[ext]" />
+
+    <!-- Retrieve the ivy revision -->
+	<ivy:info file="${ivy.dep.file}" />
+	<propertyregex property="major.version"
+	               input="${ivy.revision}"
+				   regexp="([^\.]+)"
+				   select="\1" 
+				   defaultValue="0"/>
+ 	<propertyregex property="minor.version"
+	               input="${ivy.revision}"
+				   regexp="[^\.]+\.([^\.]+)"
+				   select="\1" 
+				   defaultValue="0"/>
+	<propertyregex property="maintenance.version"
+	               input="${ivy.revision}"
+				   regexp="[^\.]+\.[^\.]+\.([^\.]+)"
+				   select="\1" 
+				   defaultValue="0"/>
+	<propertyregex property="patch.version"
+	               input="${ivy.revision}"
+				   regexp="[^\.]+\.[^\.]+\.[^\.]+\.([^\.]+)"
+				   select="\1" 
+				   defaultValue="0"/>
+              			 
+	<!-- Fill in revision proeprties -->
+	<copy file="${common.build.script.dir}/version_template.properties" 
+	      tofile="${common.build.script.dir}/version.properties" />
+
+	<replaceregexp file="${common.build.script.dir}/version.properties"
+                   match="major=.*"
+                   replace="major=${major.version}"/>
+	<replaceregexp file="${common.build.script.dir}/version.properties"
+                   match="minor=.*"
+                   replace="minor=${minor.version}"/>
+	<replaceregexp file="${common.build.script.dir}/version.properties"
+                   match="maintenance=.*"
+                   replace="maintenance=${maintenance.version}"/>
+	<replaceregexp file="${common.build.script.dir}/version.properties"
+                   match="patch=.*"
+                   replace="patch=${patch.version}"/>
+	<replaceregexp file="${common.build.script.dir}/version.properties"
+                   match="build=.*"
+                   replace="build=${build.number}"/>
+  </target>
+
+  <!-- Create version.jar -->
+  <target name="create_version_jar" depends="create_version_properties">
+	<mkdir dir="${build.root.dir}"/>
+	<mkdir dir="${build.root.dir}/com/nextlabs/version" />
+    <copy file="${common.build.script.dir}/version.properties" 
+	      tofile="${build.root.dir}/com/nextlabs/version/version.properties" />
+  	<jar destfile="${build.root.dir}/version.jar" 
+	     basedir="${build.root.dir}"
+		 excludes="**">
+	  <metainf dir="${build.root.dir}">
+	    <include name="com/nextlabs/version/version.properties" />
+	  </metainf>
+	</jar>
+	<delete dir="${build.root.dir}/com" />
+
+	<!-- Copy file to build.root.dir for other builds to use -->
+    <copy file="${common.build.script.dir}/version.properties" 
+	      tofile="${build.root.dir}/version.properties" />
+  </target>
+</project>

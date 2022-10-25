@@ -1,0 +1,24 @@
+<project name="common-userattribute" default="build" xmlns:ivy="antlib:org.apach.ivy.ant">
+	<property name="nlbuildroot" value="${basedir}/../.." />
+	<property name="src.dir" value="${basedir}" />
+	<property name="common.build.script.dir" value="${nlbuildroot}/build_scripts" />
+	<property name="build.dest" value="${nlbuildroot}/build" />
+
+	<!-- Load build properties -->
+	<property file="${basedir}/build.properties" />
+
+	<!-- Import required common build files -->
+	<import file="${common.build.script.dir}/java_build.xml" />
+
+	<target name="compile">
+		<javac srcdir="${src.dir}" destdir="${build.dest}" debug="true">
+			<classpath>
+				<fileset dir="${nlbuildroot}/xlib/jar">
+					<include name="*.jar" />
+				</fileset>
+			</classpath>
+		</javac>
+	</target>
+
+	<target name="build" depends="compile" />
+</project>

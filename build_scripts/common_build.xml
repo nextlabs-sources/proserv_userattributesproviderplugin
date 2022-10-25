@@ -1,0 +1,309 @@
+<project name="common_build" xmlns:ivy="antlib:org.apache.ivy.ant" xmlns:nl="antlib:com.nextlabs.bnr.ant">
+  <dirname property="common.build.script.dir" file="${ant.file.common_build}"/>
+
+  <import file="${common.build.script.dir}/ivy_build.xml" />
+  <import file="${common.build.script.dir}/multi_project_build.xml" />
+   <property file="${common.build.script.dir}/common_build.properties"/>
+   <property file="${common.build.script.dir}/hibernate_client_build.properties"/> 
+
+  <!-- **************************************************************************
+	   The following tasks are part of the build lifecycle
+	   *************************************************************************** -->
+  <target name="init_properties" description="load properties">
+	<!-- Load Nextlabs Ttasks -->
+    <path id="nl.taskdef.classpath">
+	  <pathelement location="${common.build.script.dir}/antTasks.jar" />
+	</path>
+    <taskdef resource="com/nextlabs/bnr/ant/antlib.xml" uri="antlib:com.nextlabs.bnr.ant">
+	  <classpath refid="nl.taskdef.classpath"/>
+    </taskdef>  
+
+	<nl:propertyFile fileName="build" />	 
+	<nl:propertyFile dir="${common.build.script.dir}" fileName="common_build"/>	
+  </target>
+
+  <target name="init_tasks" depends="init_ivy" description="Intiailize any third party tasks">
+	<!-- Load Ant-Contrib tasks -->
+	<ivy:cachepath pathid="ant-contrib.taskdef.classpath" file="${common.build.script.dir}/common_build_ivy.xml" conf="ant-contrib" resolveId="ant_contrib_resolve_id"/>
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
+	  <classpath refid="ant-contrib.taskdef.classpath"/>
+	</taskdef>     
+  </target>
+
+  <target name="init_targetenv_list" description="Initialize the targetenv list.  This is an internal target">
+	<!-- Currently builds all environments!  Need to filter out the environments not in the current OS -->
+    <if>
+	  <not>
+		<isset property="targetenv.list" />
+	  </not>
+	  <then>
+		<!-- Ideally, default is the current system.  Need a way to map current os to our target environments -->
+		<property name="targetenv.list" value="win_${os.arch}" />		
+	  </then>
+	</if>
+
+  </target>
+
+  <target name="init" depends="init_properties, init_ivy, init_tasks, init_targetenv_list" description="Initialize build">
+	<foreach list="${targetenv.list}" 
+			 target="init_for_targetenv" 
+			 param="targetenv" 
+			 delimiter=";" 
+			 inheritall="true" 
+			 inheritrefs="true" />
+  </target>
+
+  <!-- Init for each target environments -->
+  <target name="init_for_targetenv" description="Initialization specific to a target environment" />
+
+  <!-- Resolve dependencies -->
+  <target name="resolve" 
+          description="Resolve all dependencies" 
+          depends="init">
+
+    <ivy:resolve conf="*" resolveId="${ant.project.name}" log="download-only" />
+
+	<!-- Performance optimization.  Only generate report if dependecies have changed -->
+	<!-- FIX ME!!! -->
+    <if>
+	  <equals arg1="${ivy.deps.changed}" arg2="true" />
+	  <then>
+        <ivy:report todir="${build.dir}/report/ivy" conf="*" resolveId="${ant.project.name}"/>	  
+	  </then>
+	</if>
+
+	<foreach list="${targetenv.list}" 
+			 target="resolve_for_targetenv" 
+			 param="targetenv" 
+			 delimiter=";" 
+			 inheritall="true" 
+			 inheritrefs="true" />
+  </target>
+
+  <!-- Resolve for each target environments -->
+  <target name="resolve_for_targetenv" description="Initialization specific to a target environment" />
+
+  <!-- Copy resources -->
+  <target name="copy_resource"
+          description="Copy all files from src/resource to build/resource"
+		  depends="init">
+	<available property="src.main.resource.dir.available" file="${src.main.resource.dir}" type="dir"/>
+	<if>
+	  <equals arg1="${src.main.resource.dir.available}" arg2="true" />
+	  <then>
+	    <mkdir dir="${build.main.resource.dir}" />
+        <copy todir="${build.main.resource.dir}" overwrite="true">
+	      <fileset dir="${src.main.resource.dir}/" />
+	    </copy>
+
+		<!-- ?? Copy main resource to test resource as well?  Not sure if this is appropriate -->
+		<mkdir dir="${build.test.resource.dir}" />
+        <copy todir="${build.test.resource.dir}" overwrite="true">
+	      <fileset dir="${src.main.resource.dir}/" />
+	    </copy>
+	  </then>
+	</if>
+
+	<available property="src.test.resource.dir.available" file="${src.test.resource.dir}" type="dir"/>
+	<if>
+	  <equals arg1="${src.test.resource.dir.available}" arg2="true" />
+	  <then>
+	    <mkdir dir="${build.test.resource.dir}" />
+        <copy todir="${build.test.resource.dir}" overwrite="true">
+	      <fileset dir="${src.test.resource.dir}/" />
+	    </copy>
+	  </then>
+	</if>
+
+	<!-- Copy Images -->
+	<available property="src.main.image.dir.available" file="${src.main.image.dir}" type="dir"/>
+	<if>
+	  <equals arg1="${src.main.image.dir.available}" arg2="true" />
+	  <then>
+	    <mkdir dir="${build.main.image.dir}" />
+        <copy todir="${build.main.image.dir}" overwrite="true">
+	      <fileset dir="${src.main.image.dir}/" />
+	    </copy>
+	  </then>
+	</if>
+
+	<available property="src.test.image.dir.available" file="${src.test.image.dir}" type="dir"/>
+	<if>
+	  <equals arg1="${src.test.image.dir.available}" arg2="true" />
+	  <then>
+	    <mkdir dir="${build.test.image.dir}" />
+        <copy todir="${build.test.image.dir}" overwrite="true">
+	      <fileset dir="${src.test.image.dir}/" />
+	    </copy>
+	  </then>
+	</if>
+
+	<foreach list="${targetenv.list}" 
+			 target="copy_resource_for_targetenv" 
+			 param="targetenv" 
+			 delimiter=";" 
+			 inheritall="true" 
+			 inheritrefs="true" />
+  </target>
+
+  <target name="copy_resource_for_targetenv" description="Initialization specific to a target environment" />
+
+  <target name="pre_compile" 
+          description="Perform any necessary steps required before compile, such as code generation" 
+          depends="resolve">
+	<foreach list="${targetenv.list}" 
+			 target="pre_compile_for_targetenv" 
+			 param="targetenv" 
+			 delimiter=";" 
+			 inheritall="true" 
+			 inheritrefs="true" />
+  </target>
+
+  <target name="pre_compile_for_targetenv" description="Initialization specific to a target environment" />
+
+  <target name="compile" 
+          description="Compile source code" 
+          depends="pre_compile">
+	<foreach list="${targetenv.list}" 
+			 target="compile_for_targetenv" 
+			 param="targetenv" 
+			 delimiter=";" 
+			 inheritall="true" 
+			 inheritrefs="true" />
+  </target>
+
+  <target name="compile_for_targetenv" description="Initialization specific to a target environment" />
+
+  <target name="package" 
+          description="Package the compiled elements (jar, war, etc.)" 
+          depends="copy_resource, compile">
+	<foreach list="${targetenv.list}" 
+			 target="package_for_targetenv" 
+			 param="targetenv" 
+			 delimiter=";" 
+			 inheritall="true" 
+			 inheritrefs="true" />
+  </target>
+
+  <target name="package_for_targetenv" description="Initialization specific to a target environment" />
+
+  <target name="deploy" 
+          description="If appropriate, deploy to a location in which the module can be executed" 
+          depends="package">
+	<foreach list="${targetenv.list}" 
+			 target="deploy_for_targetenv" 
+			 param="targetenv" 
+			 delimiter=";" 
+			 inheritall="true" 
+			 inheritrefs="true" />
+  </target>
+
+  <target name="deploy_for_targetenv" description="Initialization specific to a target environment" />
+
+  <target name="build" 
+          description="Build the project" 
+          depends="multi_project_build.build, deploy"/>
+
+  <!-- **************************************************************************
+	   End build lifecycle tasks
+	   *************************************************************************** -->
+
+  <target name="clean"
+          description="Delete all build artifacts"
+		  depends="multi_project_build.clean">
+    <delete includeemptydirs="true" dir="${build.dir}"/>
+    <delete includeemptydirs="true" dir="${deploy.dir}"/>
+  </target>
+
+  <target name="rebuild"
+          description="Run the clean and build targets"
+		  depends="clean, build" />
+
+  <!-- Download the dependencies for this module or product.  Downloads to the build directory by configuration -->
+  <target name="download_dependencies" 
+          description="A task that can be used to download depencies in a standard fashion"
+		  depends="resolve">
+
+	<mkdir dir="${build.dependencies.dir}" />
+	<ivy:retrieve pattern="${build.dependencies.dir}/[conf]/include/([releasetype]_)([os]_)([arch])/([compiler])/[artifact].[ext]"
+				  conf="*"
+				  type="h" 
+				  resolveId="module_resolve_id"/>
+	
+	<ivy:retrieve pattern="${build.dependencies.dir}/[conf]/installer/([releasetype]_)([os]_)([arch])/([compiler])/[artifact].[ext]"
+				  conf="*"
+				  type="obl, msm" 
+				  resolveId="module_resolve_id"/>
+	<ivy:retrieve pattern="${build.dependencies.dir}/[conf]/lib/([releasetype]_)([os]_)([arch])/([compiler])/[artifact].[ext]"
+				  conf="*"
+				  type="dll,lib" 
+				  resolveId="module_resolve_id"/>
+	<ivy:retrieve pattern="${build.dependencies.dir}/[conf]/jlib/([releasetype]_)([os]_)([arch])/([compiler])/[artifact].[ext]"
+				  conf="*"
+				  type="jar" 
+				  resolveId="module_resolve_id"/>
+	<ivy:retrieve pattern="${build.dependencies.dir}/[conf]/bin/([releasetype]_)([os]_)([arch])/([compiler])/[artifact].[ext]"
+				  conf="*"
+				  type="exe" 
+				  resolveId="module_resolve_id"/>
+	<ivy:retrieve pattern="${build.dependencies.dir}/[conf]/resource/([releasetype]_)([os]_)([arch])/([compiler])/[artifact].[ext]"
+				  conf="*"
+				  type="!h, !obl, !dll, !lib, !jar, !msm, !exe" 
+				  resolveId="module_resolve_id"/>
+	<ivy:retrieve pattern="${build.dependencies.dir}/[conf]/zip/([releasetype]_)([os]_)([arch])/([compiler])/[artifact].[ext]"
+				  conf="*"
+				  type="zip" 
+				  resolveId="module_resolve_id"/>
+
+
+  </target>
+
+  <target name="dependency-report"
+          description="Create an html report describing the dependency resolution for this build"
+		  depends="resolve">
+
+  </target>		  		  
+
+  <!-- Deprecated.  Previously used for platform builds -->
+  <target name="publish_local" depends="resolve">
+   	<ivy:publish artifactspattern="${build.dir}/[artifact].[ext]"
+   			     resolver="build-repository"
+				 overwrite="true"
+				 forcedeliver="true"
+				 publishivy="true"
+				 haltonmissing="false" 
+				 /> <!-- Need a way to publish ivy files without having to publish all confs-->
+
+	<!-- temporary as the build is further transformed to IVY -->
+   	<ivy:publish artifactspattern="${build.dir}/[artifact].[ext]" 
+   			     resolver="temp-build-repository"
+				 overwrite="true"
+				 forcedeliver="true"
+				 publishivy="false"
+				 conf="main,test"  
+				 /> <!-- Need a way to specify all but "report" for confs-->
+  </target>
+
+  <target name="publish_locally" depends="resolve">
+   	<ivy:publish artifactspattern="${build.dir}/[artifact].[ext]"
+   			     resolver="local-repository"
+				 overwrite="true"
+				 forcedeliver="true"
+				 publishivy="true"
+				 haltonmissing="false"
+				 pubrevision="100000"
+				 /> <!-- The pub revision is large to make sure it is taken.  Tried using "latest-strategies" special meaning words, but this didn't work out.  See comments in "ivysettings.xml" file. -->
+	<!-- Need a way to publish ivy files without having to publish all confs-->
+  </target>
+
+  <target name="publish_report" depends="resolve">
+   	<ivy:publish artifactspattern="${build.report.dir}/[artifact].[ext]" 
+   			     resolver="build-report-repository"
+				 overwrite="true"
+				 forcedeliver="true"
+				 publishivy="false"
+				 conf="report"
+				 />	
+  </target>
+
+</project>

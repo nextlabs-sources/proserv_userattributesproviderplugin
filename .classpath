@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="src/common/src/java/main/|src/server/src/java/main/|src/client/src/java/main/|build/|build_scripts/|docs/|etc/|xlib/jar/|xlib/|scripts/|src/" kind="src" path=""/>
+	<classpathentry kind="src" path="src/common/src/java/main"/>
+	<classpathentry kind="src" path="src/server/src/java/main"/>
+	<classpathentry kind="src" path="src/client/src/java/main"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="xlib/jar/agent-common.jar"/>
+	<classpathentry kind="lib" path="xlib/jar/agent-controlmanager.jar"/>
+	<classpathentry kind="lib" path="xlib/jar/agent-ipc.jar"/>
+	<classpathentry kind="lib" path="xlib/jar/ant-contrib.jar"/>
+	<classpathentry kind="lib" path="xlib/jar/app-framework.jar"/>
+	<classpathentry kind="lib" path="xlib/jar/batchdeployer.jar"/>
+	<classpathentry kind="lib" path="xlib/jar/client-pf.jar"/>
+	<classpathentry kind="lib" path="xlib/jar/client-security-config.jar"/>
+	<classpathentry kind="lib" path="xlib/jar/common-domain-types.jar"/>
+	<classpathentry kind="lib" path="xlib/jar/common-domain.jar"/>
+	<classpathentry kind="lib" path="xlib/jar/common-framework-types.jar"/>
+	<classpathentry kind="lib" path="xlib/jar/common-framework.jar"/>
+	<classpathentry kind="lib" path="xlib/jar/common-pf.jar"/>
+	<classpathentry kind="lib" path="xlib/jar/common-res.jar"/>
+	<classpathentry kind="lib" path="xlib/jar/common-version-impl.jar"/>
+	<classpathentry kind="lib" path="xlib/jar/common-version.jar"/>
+	<classpathentry kind="lib" path="xlib/jar/commons-io-2.4.jar"/>
+	<classpathentry kind="lib" path="xlib/jar/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="xlib/jar/crypt.jar"/>
+	<classpathentry kind="lib" path="xlib/jar/ehcache-3.0.2.jar"/>
+	<classpathentry kind="lib" path="xlib/jar/logremover.jar"/>
+	<classpathentry kind="lib" path="xlib/jar/policy-services.jar"/>
+	<classpathentry kind="lib" path="xlib/jar/policy-types.jar"/>
+	<classpathentry kind="lib" path="xlib/jar/server-framework.jar"/>
+	<classpathentry kind="lib" path="xlib/jar/server-shared-services.jar"/>
+	<classpathentry kind="lib" path="xlib/jar/server-shared-types.jar"/>
+	<classpathentry kind="lib" path="xlib/jar/slf4j-api-1.7.7.jar"/>
+	<classpathentry kind="lib" path="xlib/jar/version-types.jar"/>
+	<classpathentry kind="lib" path="xlib/jar/version.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

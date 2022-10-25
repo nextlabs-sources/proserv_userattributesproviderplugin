@@ -1,0 +1,82 @@
+<project name="wsdl_build" xmlns:ivy="antlib:org.apache.ivy.ant"
+		 xmlns:nl="antlib:com.nextlabs.bnr.ant">
+
+	<dirname property="common.build.script.dir" file="${ant.file.wsdl_build}"/>
+	<var name="nlbuildroot" value="${common.build.script.dir}/.." />
+
+	<import file="${common.build.script.dir}/common_build.xml" />
+
+  <target name="init">
+	<nl:propertyFile dir="${common.build.script.dir}" fileName="wsdl_build"/>	
+
+	<ivy:configure file="${common.build.script.dir}/ivysettings.xml" override="false"/>
+
+	<ivy:cachepath pathid="wsdl.gen.classpath" file="${common.build.script.dir}/wsdl_build_ivy.xml" conf="ant" resolveId="wsdl2java_resolve_id"/>
+	<taskdef name="wsdl2java" classname="com.bluejungle.destiny.wsgen.SecureWsdl2javaAntTask">
+	  <classpath refid="wsdl.gen.classpath"/>
+	</taskdef>
+  </target> 
+
+  <target name="pre_compile" depends="resolve">
+	<mkdir dir="${build.wsdl.temp.dir}" />
+	<copy todir="${build.wsdl.temp.dir}" flatten="true" includeEmptyDirs="false">
+	  <fileset dir="${src.wsdl.dir}"/>
+	</copy>
+
+	<available property="src.xsd.dir.exists" file="${src.xsd.dir}" />
+	<if>
+	  <equals arg1="${src.xsd.dir.exists}" arg2="true" />
+	  <then>
+		<copy todir="${build.wsdl.temp.dir}" flatten="true" includeEmptyDirs="false">
+		  <fileset dir="${src.xsd.dir}"/>
+		</copy>
+	  </then>
+	</if>	 
+
+	<ivy:retrieve pattern="${build.wsdl.temp.dir}/[artifact].[ext]"
+				  conf="main"
+				  type="xsd" 
+				  resolveId="${ant.project.name}"/>  
+  </target>
+  
+  <target name="compile" depends="pre_compile">
+	<mkdir dir="${build.gen.classes.dir}" />
+
+	<javac srcdir="${src.main.gen.dir}/" destdir="${build.gen.classes.dir}" fork="true" debug="${compile.debug}" verbose="${compile.verbose}" source="${compile.source}" executable="${compile.executable}">
+		<classpath>
+			<path refid="wsdl.gen.classpath" />
+			<fileset dir="${nlbuildroot}/xlib/jar">
+				<include name="*.jar" />
+			</fileset>
+		</classpath>
+	</javac>
+  </target>
+
+  <target name="package" depends="compile">
+    <!-- Setup paths for merge_wsdd.  Do it here so it happens only once -->
+    <ivy:cachepath pathid="wsdl.gen.classpath" file="${common.build.script.dir}/wsdl_build_ivy.xml" conf="ant" resolveId="wsdl2java_resolve_id"/>
+	<!-- We add the main classpath in case the service and types are generated in a third party modules -->
+    <ivy:cachepath transitive="false" pathid="main.classpath" conf="main" resolveId="${ant.project.name}" />
+
+    <copy todir="${build.wsdl.temp.dir}" file="${common.build.script.dir}/server-config.wsdd" />
+    <foreach target="merge_wsdd" param="wsdd.file" inheritall="true" inheritrefs="true">
+	  <fileset dir="${build.wsdl.temp.dir}" includes="*.wsdd" />
+	</foreach>
+  </target>
+
+  <target name="merge_wsdd">
+    <java failonerror="true" 
+	      classname="org.apache.axis.utils.Admin" 
+		  dir="${build.wsdl.temp.dir}"
+		  fork="true">
+      <classpath>
+	    <path refid="main.classpath"/>
+	    <path refid="wsdl.gen.classpath"/>
+		<path location="${build.gen.classes.dir}" />
+	  </classpath>	
+      <arg value="server"/>
+      <arg value="${wsdd.file}"/>
+    </java>
+  </target>
+
+</project>

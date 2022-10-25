@@ -1,0 +1,18 @@
+<project name="init_ivy_build" xmlns:ivy="antlib:org.apache.ivy.ant">
+
+  <dirname property="common.build.script.dir" file="${ant.file.common_build}"/>
+  
+  <target name="init_ivy" description="Initialize Ivy" unless="ivy.configured">
+	<!-- Load Ivy tasks -->
+    <path id="ivy.taskdef.classpath">
+	  <pathelement location="${common.build.script.dir}/ivy.jar" />
+	</path>
+    <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant">
+	  <classpath refid="ivy.taskdef.classpath"/>
+    </taskdef>     
+
+    <ivy:configure file="${common.build.script.dir}/ivysettings.xml" />
+
+	<property name="ivy.configured" value="true" />
+  </target>
+</project>
